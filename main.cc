@@ -1,3 +1,4 @@
+#include <cmath>
 #include <iostream>
 #include <vector>
 
@@ -8,6 +9,7 @@ Matrix addMatrices(const Matrix & a, const Matrix & b) {
     if (a.empty() || a.size() != b.size() || a[0].size() != b[0].size()) return Matrix();
     // Initialize the resultant Matrix with the first entry's number of rows.
     Matrix result(a.size());
+    // Loop through each row and column, then add the corresponding entries and insert them in the resultant Matrix.
     for (int r = 0; r < a.size(); ++r) {
         for (int c = 0; c < a[0].size(); ++c) {
             result[r].push_back(a[r][c] + b[r][c]);
@@ -17,8 +19,11 @@ Matrix addMatrices(const Matrix & a, const Matrix & b) {
 }
 
 Matrix subtractMatrices(const Matrix & a, const Matrix & b) {
+    // Matrices must have the same dimensions.
     if (a.empty() || a.size() != b.size() || a[0].size() != b[0].size()) return Matrix();
+    // Initialize the resultant Matrix with the first entry's number of rows.
     Matrix result(a.size());
+    // Loop through each row and column, then subtract the corresponding entries and insert them in the resultant Matrix.
     for (int r = 0; r < a.size(); ++r) {
         for (int c = 0; c < a[0].size(); ++c) {
             result[r].push_back(a[r][c] - b[r][c]);
@@ -29,6 +34,7 @@ Matrix subtractMatrices(const Matrix & a, const Matrix & b) {
 
 double multiplicationHelper(int r, int c, int commonExtent, const Matrix & a, const Matrix & b) {
     double productResult = 0.0;
+    // It looks at the resultant Matrix's entry that we want to calculate, and makes the proper multiplication of a and b entries.
     for (int k = 0; k < commonExtent; ++k) {
         productResult += a[r][k] * b[k][c];
     }
@@ -36,12 +42,15 @@ double multiplicationHelper(int r, int c, int commonExtent, const Matrix & a, co
 }
 
 Matrix multiplyMatrices(const Matrix & a, const Matrix & b) {
+    // Number of columns of first Matrix and number of rows of second Matrix must match.
     if (a.empty() || a[0].size() != b.size()) return Matrix();
+    // The resultant Matrix should have the number of columns of the first entry, and the number of columns of the second entry.
     Matrix result(a.size());
     int commonExtent = a[0].size();
 
     for (int r = 0; r < a.size(); ++r) {
         for (int c = 0; c < b[0].size(); ++c) {
+            // Call the helper function that will calculate the value for our entry properly.
             result[r].push_back(multiplicationHelper(r, c, commonExtent, a, b));
         }
     }
@@ -67,10 +76,24 @@ double determinantHelper(const Matrix & a) {
     if (a.size() == 2) {
         return a[0][0] * a[1][1] - a[0][1] * a[1][0];
     }
-    for (int r = 0; r < a.size(); ++r) {
-        for (int c = 0; c < a[0].size(); ++c) {
+    double determinantResult = 0.0;
+    // Initialize a sub-Matrix, which its rows and columns will be reduced by 1.
+    int dimensionSize = a.size();
+    Matrix subMatrix(dimensionSize - 1);
+    for (int r = 0; r < dimensionSize; ++r) {
+        int subi = 0;
+        for (int c = 1; c < dimensionSize; ++c) {
+            int subj = 0;
+            for (int k = 0; k < dimensionSize; ++k) {
+                if (r == c) continue;
+                subMatrix[subi][subj] = a[r][c];
+                ++subj;
+            }
+            ++subi;
         }
+        determinantResult += pow(-1, r) * a[0][r] * determinantHelper(subMatrix);
     }
+    return determinantResult;
 }
 
 double determinant(const Matrix & a) {
@@ -92,11 +115,11 @@ void printMatrix(const Matrix & sampleMatrix) {
 
 int main() {
     // Initialize first Matrix.
-    Matrix a = {{1, 2, 3},
+    Matrix a    {{1, 2, 3},
                 {3, 5, 6},
                 {4, 1, 8}};
     // Initialize second Matrix.
-    Matrix b = {{3, 5, 1},
+    Matrix b    {{3, 5, 1},
                 {4, 7, 2},
                 {3, 5, 1}};
     
@@ -111,7 +134,7 @@ int main() {
     printMatrix(result);
 
     // Initialize a new non-square Matrix.
-    Matrix nonsquareMatrix = {{4, 5},
+    Matrix nonsquareMatrix   {{4, 5},
                               {7, 8},
                               {1, 3}};
     result = transpose(nonsquareMatrix);
