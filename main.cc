@@ -71,34 +71,41 @@ Matrix transpose(const Matrix & a) {
     return result;
 }
 
+Matrix getSubMatrix(int i, int j, int dimensionSize, const Matrix & a) {
+    Matrix resultantMatrix(dimensionSize - 1);
+    int m = 0;
+    for (int r = 0; r < dimensionSize; ++r) {
+        for (int c = 0; c < dimensionSize; ++c) {
+            if (i == r) break;
+            if (j == c) continue;
+            resultantMatrix[m].push_back(a[r][c]);
+        }
+        if (!resultantMatrix[m].empty()) ++m;
+    }
+    return resultantMatrix;
+}
+
 double determinantHelper(const Matrix & a) {
-    // Base case - the input Matrix is a 2x2 Matrix, and we just calculate the cofactor for it.
+    // If the input Matrix is a 2x2 Matrix, and we just calculate the cofactor for it.
     if (a.size() == 2) {
         return a[0][0] * a[1][1] - a[0][1] * a[1][0];
     }
     double determinantResult = 0.0;
-    // Initialize a sub-Matrix, which its rows and columns will be reduced by 1.
+    // Initialize the size of the input matrix once and use it everywhere.
     int dimensionSize = a.size();
-    Matrix subMatrix(dimensionSize - 1);
     for (int r = 0; r < dimensionSize; ++r) {
-        int subi = 0;
-        for (int c = 1; c < dimensionSize; ++c) {
-            int subj = 0;
-            for (int k = 0; k < dimensionSize; ++k) {
-                if (r == c) continue;
-                subMatrix[subi][subj] = a[r][c];
-                ++subj;
-            }
-            ++subi;
-        }
-        determinantResult += pow(-1, r) * a[0][r] * determinantHelper(subMatrix);
+        // Initialize a sub-Matrix using the getSubMatrix function.
+        Matrix subMatrix = getSubMatrix(r, 0, dimensionSize, a);
+        determinantResult += pow(-1, r) * a[r][0] * determinantHelper(subMatrix);
     }
     return determinantResult;
 }
 
 double determinant(const Matrix & a) {
     // If it is NOT a square matrix, determinant cannot be calculated.
-    if (a.empty() || a.size() != a[0].size()) return -1;
+    if (a.empty() || (a.size() != a[0].size())) return -1;
+    // If only one entry, then we can just return the value of that entry.
+    if (a.size() == 1) return a[0][0];
     return determinantHelper(a);
 }
 
@@ -139,6 +146,9 @@ int main() {
                               {1, 3}};
     result = transpose(nonsquareMatrix);
     printMatrix(result);
+
+    std::cout << "The determinant of Matrix a: " << determinant(a) << "\n";
+
 
     return 0;
 }
