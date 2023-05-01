@@ -1,3 +1,4 @@
+#include <array>
 #include <cmath>
 #include <iostream>
 #include <vector>
@@ -107,6 +108,20 @@ double determinant(const Matrix & a) {
     // If only one entry, then we can just return the value of that entry.
     if (a.size() == 1) return a[0][0];
     return determinantHelper(a);
+}
+
+std::array<double, 3> cramersRule(const Matrix & a, const Matrix & b) {
+    std::array<double, 3> result;
+    double mainDeterminant = determinant(a);
+
+    for (int c = 0; c < a.size(); ++c) {
+        Matrix temp = a;
+        for (int r = 0; r < a.size(); ++r) {
+            temp[r][c] = b[r][0];
+        }
+        result[c] = determinant(temp) / mainDeterminant;
+    }
+    return result;
 }
 
 void printMatrix(const Matrix & sampleMatrix) {
