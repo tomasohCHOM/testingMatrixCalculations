@@ -61,11 +61,14 @@ Matrix multiplyMatrices(const Matrix & a, const Matrix & b) {
 Matrix transpose(const Matrix & a) {
     // If the input Matrix is empty, we don't need to do anything, just return a default-constructed Matrix.
     if (a.empty()) return Matrix();
-    // Initialize the resultant Matrix to the number of columns of the input Matrix.
+    // Initialize the resultant Matrix's rows to the number of columns of the input Matrix.
     Matrix result(a[0].size());
 
     for (int r = 0; r < a.size(); ++r) {
         for (int c = 0; c < a[0].size(); ++c) {
+            // If the input matrix has a i-j value, then the result Matrix should make it a j-i value
+            // (where i is the row and j is the column).
+            // Push back values using c (column) as our new row.
             result[c].push_back(a[r][c]);
         }
     }
@@ -75,19 +78,23 @@ Matrix transpose(const Matrix & a) {
 Matrix getSubMatrix(int i, int j, int dimensionSize, const Matrix & a) {
     Matrix resultantMatrix(dimensionSize - 1);
     int m = 0;
+    // Loop through rows and columns.
     for (int r = 0; r < dimensionSize; ++r) {
         for (int c = 0; c < dimensionSize; ++c) {
+            // If it happens to be the same row, break. If same column, continue to the next iteration.
             if (i == r) break;
             if (j == c) continue;
+            // Otherwise, push the value to the subMatrix.
             resultantMatrix[m].push_back(a[r][c]);
         }
+        // If added values to the subMatrix successfully, move to the next subMatrix row.
         if (!resultantMatrix[m].empty()) ++m;
     }
     return resultantMatrix;
 }
 
 double determinantHelper(const Matrix & a) {
-    // If the input Matrix is a 2x2 Matrix, and we just calculate the cofactor for it.
+    // If the input Matrix is a 2x2 Matrix, we just calculate the cofactor for it.
     if (a.size() == 2) {
         return a[0][0] * a[1][1] - a[0][1] * a[1][0];
     }
@@ -97,6 +104,7 @@ double determinantHelper(const Matrix & a) {
     for (int r = 0; r < dimensionSize; ++r) {
         // Initialize a sub-Matrix using the getSubMatrix function.
         Matrix subMatrix = getSubMatrix(r, 0, dimensionSize, a);
+        // Accumulate the determinant for Matrix a, making a recursive call passing that subMatrix.
         determinantResult += pow(-1, r) * a[r][0] * determinantHelper(subMatrix);
     }
     return determinantResult;
@@ -162,8 +170,20 @@ int main() {
     result = transpose(nonsquareMatrix);
     printMatrix(result);
 
-    std::cout << "The determinant of Matrix a: " << determinant(a) << "\n";
+    std::cout << "The determinant of a non-square matrix: " << determinant(result) << "\n";
+    std::cout << "The determinant of Matrix adding both a and b: " << determinant(addMatrices(a, b)) << "\n";
 
+    Matrix constantB {{5},
+                      {3},
+                      {8}};
+
+    std::array<double, 3> cramersResult = cramersRule(a, constantB);
+    std::cout << "Applying Cramer's rule with Matrix a and constantB:" << "\n";
+    unsigned int count = 1;
+    for (const double & result : cramersResult) {
+        std::cout << "x" << count << " = " << result << "\n";
+        ++count;
+    }
 
     return 0;
 }
