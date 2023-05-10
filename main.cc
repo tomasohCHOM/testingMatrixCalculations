@@ -1,6 +1,7 @@
 #include <array>
 #include <cmath>
 #include <iostream>
+#include <iomanip>
 #include <vector>
 
 using Matrix = std::vector<std::vector<double>>;
@@ -136,11 +137,39 @@ void printMatrix(const Matrix & sampleMatrix) {
     for (int r = 0; r < sampleMatrix.size(); ++r) {
         std::cout << "[ ";
         for (int c = 0; c < sampleMatrix[0].size(); ++c) {
-            std::cout << " " << sampleMatrix[r][c] << " ";
+            if (c != sampleMatrix[0].size() - 1)
+                std::cout << std::setprecision(4) << sampleMatrix[r][c] << std::setw(8);
+            else
+                std::cout << std::setprecision(4) << sampleMatrix[r][c];
         }
         std::cout << "]\n";
     }
     std::cout << "\n";
+}
+
+Matrix rref(const Matrix & a) {
+    if (a.empty()) return a;
+
+    Matrix result = a;
+    const int rows = result.size();
+    const int cols = result[0].size();
+    int lead = 0;
+    while (lead < rows) {
+        double divisor, multiplier;
+        for (int r = 0; r < rows; ++r) {
+            divisor = result[lead][lead];
+            multiplier = result[r][lead] / divisor;
+            for (int c = 0; c < cols; ++c) {
+                if (r == lead)
+                    result[r][c] /= divisor;
+                else
+                    result[r][c] -= result[lead][c] * multiplier;
+            } 
+        }
+        ++lead;
+        printMatrix(result);
+    }
+    return result;
 }
 
 int main() {
@@ -184,6 +213,14 @@ int main() {
         std::cout << "x" << count << " = " << result << "\n";
         ++count;
     }
+
+    Matrix testRREF  {{5, -6, -7, 7},
+                    {3, -2,  5, -17},
+                    {2,  4, -3,  29}};
+    
+    std::cout << "Testing Reduced Row Echelon Form: \n";
+    printMatrix(testRREF);
+    testRREF = rref(testRREF);
 
     return 0;
 }
