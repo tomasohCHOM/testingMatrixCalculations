@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <array>
 #include <cmath>
 #include <iostream>
@@ -148,6 +149,7 @@ void printMatrix(const Matrix & sampleMatrix) {
 }
 
 Matrix rref(const Matrix & a) {
+    /*
     if (a.empty()) return a;
 
     Matrix result = a;
@@ -168,6 +170,46 @@ Matrix rref(const Matrix & a) {
         }
         ++lead;
         printMatrix(result);
+    }
+    return result;
+    */
+    Matrix result = a;
+    int lead = 0; // The current leading column
+    int rowCount = result.size(); // The number of rows in the matrix
+    int colCount = result[0].size(); // The number of columns in the matrix
+    for (int r = 0; r < rowCount; r++) { // For each row...
+        if (colCount <= lead) { // If we've processed all columns, we're done
+            return result;
+        }
+        int i = r;
+        // Search for a row with a non-zero entry in the current leading column
+        while (abs(result[i][lead]) < 1e-10) {
+            i++;
+            if (rowCount == i) { // If we've processed all rows, move to the next column
+                i = r;
+                lead++;
+                if (colCount == lead) { // If we've processed all columns, we're done
+                    return result;
+                }
+            }
+        }
+        // Swap the current row with the row we found
+        std::swap(result[i], result[r]);
+        double lv = result[r][lead];
+        // Divide the current row by its leading coefficient to make it a leading 1
+        for (int j = 0; j < colCount; j++) {
+            result[r][j] /= lv;
+        }
+        // Subtract multiples of the current row from all other rows to make their leading coefficients zero
+        for (int i = 0; i < rowCount; i++) {
+            if (i != r) {
+                double lv = result[i][lead];
+                for (int j = 0; j < colCount; j++) {
+                    result[i][j] -= lv * result[r][j];
+                }
+            }
+        }
+        lead++; // Move to the next leading column
     }
     return result;
 }
